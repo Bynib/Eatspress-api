@@ -1,0 +1,75 @@
+# Build results
+bin/
+obj/
+out/
+Debug/
+Release/
+x64/
+x86/
+[Aa][Rr][Mm]*/
+[Bb][Ii][Nn]/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Logs
+*.log
+
+# OS generated files
+[Tt]humbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.DS_Store
+
+# Packages
+*.nupkg
+*.snupkg
+*.nuspec
+*.vsix
+packages/
+!packages/build/
+
+# Dotnet artifacts
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Entity Framework Core
+Migrations/
+
+# User secrets
+secrets.json
+
+# ASP.NET publish
+wwwroot/
+node_modules/
+dist/
+bower_components/
+.publish/
+*.pubxml
+*.publishproj
+
+# Coverage reports
+coverage/
+*.coverage
+*.coveragexml
+
+# Other cache
+*.cache
+*.config
+*.pdb
+*.mdb
+*.tmp
+*.bak
+*.swp
+*.swo
+*.userprefs
