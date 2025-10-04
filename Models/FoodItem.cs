@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Eatspress.Models
 {
     public class FoodItem
     {
-        public int Item_Id { get; set; }
+        [Key] public int Item_Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int Prep_Time { get; set; }
@@ -16,6 +17,7 @@ namespace Eatspress.Models
         public DateTime? Deleted_At { get; set; }
 
         public FoodCategory Category { get; set; } = null;
-        public ICollection<CartDetails> CartDetails { get; set; } = new List<CartDetails>();
+        public ICollection<OrderDetails> OrderDetails { get; set; } = new List<OrderDetails>();
+        public ICollection<Cart> Carts { get; set; } = new List<Cart>();
     }
 }
