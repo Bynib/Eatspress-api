@@ -1,54 +1,96 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Eatspress.Models;
-using Eatspress.Services;
-using System.Collections.Generic;
+﻿using Eatspress.Interfaces;
+using Eatspress.ServiceModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace Eatspress.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AddressController : ControllerBase
     {
-        private readonly AddressService _service;
+        private readonly IAddressService _svc;
 
-        public AddressController(AddressService service)
+        public AddressController(IAddressService svc)
         {
-            _service = service;
-        }
-
-        [HttpGet]
-        public async Task<IEnumerable<Address>> GetAll() => await _service.GetAllAsync();
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Address>> GetById(int id)
-        {
-            var address = await _service.GetByIdAsync(id);
-            if (address == null) return NotFound();
-            return address;
+            _svc = svc;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Address>> Create(Address address)
+        public async Task<IActionResult> Create([FromBody] AddressRequest req)
         {
-            var created = await _service.CreateAsync(address);
-            return CreatedAtAction(nameof(GetById), new { id = created.Address_Id }, created);
+            try
+            {
+                var userId = int.Parse(User.FindFirst("sub")!.Value);
+                var addr = await _svc.CreateAsync(userId, req);
+                return Ok(addr);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Address>> Update(int id, Address address)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            var updated = await _service.UpdateAsync(id, address);
-            if (updated == null) return NotFound();
-            return updated;
+            try
+            {
+                var addr = await _svc.GetByIdAsync(id);
+                if (addr == null) return NotFound();
+                return Ok(addr);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            try
+            {
+                var list = await _svc.GetByUserAsync(userId);
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateAddressRequest req)
+        {
+            try
+            {
+                var addr = await _svc.UpdateAsync(req);
+                return Ok(addr);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
+            try
+            {
+                var ok = await _svc.DeleteAsync(id);
+                if (!ok) return NotFound();
+                return Ok(new { message = "Address deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

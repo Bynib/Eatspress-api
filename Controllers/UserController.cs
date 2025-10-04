@@ -1,68 +1,68 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Eatspress.Models;
-using Eatspress.Services;
-using System.Collections.Generic;
+﻿// Controllers/UserController.cs
+using System;
 using System.Threading.Tasks;
+using Eatspress.Interfaces;
+using Eatspress.ServiceModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Eatspress.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
-        private readonly UserService _service;
-
-        public UserController(UserService service)
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            _service = service;
+            _userService = userService;
         }
 
-        [HttpGet]
-        public async Task<IEnumerable<User>> GetAll() => await _service.GetAllAsync();
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
+        {
+            try
+            {
+                var updatedUser = await _userService.UpdateUserAsync(request);
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _userService.GetAllAsync();
+            return Ok(users);
+        }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetById(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var user = await _service.GetByIdAsync(id);
-            if (user == null) return NotFound();
-            return user;
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<User>> Create(User user)
-        {
-            var created = await _service.CreateAsync(user);
-            return CreatedAtAction(nameof(GetById), new { id = created.User_Id }, created);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<ActionResult<User>> Update(int id, User user)
-        {
-            var updated = await _service.UpdateAsync(id, user);
-            if (updated == null) return NotFound();
-            return updated;
+            try
+            {
+                var user = await _userService.GetByIdAsync(id);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
+            var result = await _userService.DeleteAsync(id);
+            if (!result) return NotFound(new { message = "User not found" });
+            return Ok(new { message = "User deleted successfully" });
         }
-
-        [HttpPost("login")]
-        public async Task<ActionResult<User>> Login([FromBody] LoginRequest request)
-        {
-            var user = await _service.AuthenticateAsync(request.Username, request.Password);
-            if (user == null) return Unauthorized("Invalid credentials");
-            return user;
-        }
-    }
-
-    public class LoginRequest
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 }

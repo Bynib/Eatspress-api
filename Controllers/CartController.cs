@@ -1,54 +1,80 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Eatspress.Models;
-using Eatspress.Services;
-using System.Collections.Generic;
+﻿using Eatspress.Interfaces;
+using YourApp.ServiceModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace Eatspress.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CartController : ControllerBase
     {
-        private readonly CartService _service;
+        private readonly ICartService _svc;
 
-        public CartController(CartService service)
+        public CartController(ICartService svc)
         {
-            _service = service;
-        }
-
-        [HttpGet]
-        public async Task<IEnumerable<Cart>> GetAll() => await _service.GetAllAsync();
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cart>> GetById(int id)
-        {
-            var cart = await _service.GetByIdAsync(id);
-            if (cart == null) return NotFound();
-            return cart;
+            _svc = svc;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Cart>> Create(Cart cart)
+        public async Task<IActionResult> Add([FromBody] CartRequest req)
         {
-            var created = await _service.CreateAsync(cart);
-            return CreatedAtAction(nameof(GetById), new { id = created.Item_Id }, created);
+            try
+            {
+                var cart = await _svc.AddToCartAsync(req);
+                return Ok(cart);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Cart>> Update(int id, Cart cart)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserCart(int userId)
         {
-            var updated = await _service.UpdateAsync(id, cart);
-            if (updated == null) return NotFound();
-            return updated;
+            try
+            {
+                var cart = await _svc.GetUserCartAsync(userId);
+                return Ok(cart);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] CartRequest req)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
+            try
+            {
+                var cart = await _svc.UpdateCartAsync(req);
+                if (cart == null) return NotFound(new { message = "Cart item not found" });
+                return Ok(cart);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{userId}/{itemId}")]
+        public async Task<IActionResult> Remove(int userId, int itemId)
+        {
+            try
+            {
+                var removed = await _svc.RemoveFromCartAsync(userId, itemId);
+                if (!removed) return NotFound(new { message = "Cart item not found" });
+                return Ok(new { message = "Removed successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
