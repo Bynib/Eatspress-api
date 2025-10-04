@@ -1,71 +1,99 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Eatspress.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace Eatspress.Models
+namespace Eatspress.Data
 {
-    public class EatspressContext : DbContext
+    public class AppDBContext : DbContext
     {
-        public DbSet<Address> Addresses { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<Cart> Carts { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderStatus> OrderStatuses { get; set; }
-        public DbSet<CartDetails> CartDetails { get; set; }
-        public DbSet<FoodItem> FoodItems { get; set; }
-        public DbSet<FoodCategory> FoodCategories { get; set; }
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options) { }
 
-        public EatspressContext(DbContextOptions<EatspressContext> options)
-            : base(options)
-        {
-        }
+        public DbSet<Address> Addresses => Set<Address>();
+        public DbSet<Cart> Carts => Set<Cart>();
+        public DbSet<FoodCategory> FoodCategories => Set<FoodCategory>();
+        public DbSet<FoodItem> FoodItems => Set<FoodItem>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderDetails> OrderDetails => Set<OrderDetails>();
+        public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Composite key for CartDetails
-            modelBuilder.Entity<CartDetails>()
-                .HasKey(cd => new { cd.Order_Id, cd.Item_Id });
-
-            // User -> Address
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Address)
-                .WithMany(a => a.Users)
+            //address
+            modelBuilder.Entity<Address>()
+                .HasOne(u => u.User)
+                .WithMany(a => a.Addresses)
                 .HasForeignKey(u => u.Address_Id);
 
-            // User -> Role
+            //cart
+            modelBuilder.Entity<Cart>()
+                .HasKey(c => new { c.User_id, c.Item_Id });
+            modelBuilder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Carts)
+                .HasForeignKey(c => c.User_id);
+            modelBuilder.Entity<Cart>()
+                .HasOne(c => c.FoodItem)
+                .WithMany(fi => fi.Carts)
+                .HasForeignKey(c => c.Item_Id);
+
+            //fooditem
+            modelBuilder.Entity<FoodItem>()
+                .HasOne(fc => fc.Category)
+                .WithMany(fi => fi.FoodItems)
+                .HasForeignKey(fc => fc.Category_Id);
+
+            //order
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(os => os.User_Id);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Address)
+                .WithMany(a => a.Orders)
+                .HasForeignKey(o => o.Address_Id);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Status)
+                .WithMany(os => os.Orders)
+                .HasForeignKey(os => os.Status_Id);
+
+            //oderdetails
+            modelBuilder.Entity<OrderDetails>()
+                .HasKey(od => new { od.Order_Id, od.Item_Id });
+            modelBuilder.Entity<OrderDetails>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(od => od.Order_Id);
+            modelBuilder.Entity<OrderDetails>()
+                .HasOne(od => od.FoodItem)
+                .WithMany(fi => fi.OrderDetails)
+                .HasForeignKey(od => od.Item_Id);
+
+            //user
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
                 .WithMany(r => r.Users)
                 .HasForeignKey(u => u.Role_Id);
 
-            // User -> Cart
-            modelBuilder.Entity<Cart>()
-                .HasOne(c => c.Customer)
-                .WithMany(u => u.Carts)
-                .HasForeignKey(c => c.Customer_Id);
+            modelBuilder.Entity<UserRole>().HasData(
+                new UserRole { Role_Id = 1, Role_Title = "Admin" },
+                new UserRole { Role_Id = 2, Role_Title = "User" }
+            );
 
-            // Order -> OrderStatus
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Status)
-                .WithMany(s => s.Orders)
-                .HasForeignKey(o => o.Status_Id);
+            modelBuilder.Entity<OrderStatus>().HasData(
+                new OrderStatus { Status_Id = 1, Status_Type = "Pending" },
+                new OrderStatus { Status_Id = 2, Status_Type = "Preparing" },
+                new OrderStatus { Status_Id = 3, Status_Type = "Ready" },
+                new OrderStatus { Status_Id = 4, Status_Type = "Delivered" },
+                new OrderStatus { Status_Id = 5, Status_Type = "Cancelled" }
+            );
 
-            // FoodItem -> FoodCategory
-            modelBuilder.Entity<FoodItem>()
-                .HasOne(fi => fi.Category)
-                .WithMany(fc => fc.FoodItems)
-                .HasForeignKey(fi => fi.Category_Id);
-
-            // CartDetails -> Order
-            modelBuilder.Entity<CartDetails>()
-                .HasOne(cd => cd.Order)
-                .WithMany(o => o.CartDetails)
-                .HasForeignKey(cd => cd.Order_Id);
-
-            // CartDetails -> FoodItem
-            modelBuilder.Entity<CartDetails>()
-                .HasOne(cd => cd.Item)
-                .WithMany(fi => fi.CartDetails)
-                .HasForeignKey(cd => cd.Item_Id);
+            modelBuilder.Entity<FoodCategory>().HasData(
+                new FoodCategory { Category_Id = 1, Category_Type = "Appetizer" },
+                new FoodCategory { Category_Id = 2, Category_Type = "Main Course" },
+                new FoodCategory { Category_Id = 3, Category_Type = "Dessert" },
+                new FoodCategory { Category_Id = 4, Category_Type = "Beverage" }
+            );
         }
     }
 }
