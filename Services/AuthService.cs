@@ -28,9 +28,6 @@ namespace Eatspress.Services
             if (req.Password != req.ConfirmPassword)
                 throw new Exception("Passwords do not match");
 
-            if (await _db.Users.AnyAsync(u => u.Username == req.Username))
-                throw new Exception("Username already exists");
-
             if (await _db.Users.AnyAsync(u => u.Email == req.Email))
                 throw new Exception("Email already exists");
 
@@ -41,7 +38,6 @@ namespace Eatspress.Services
                 Lastname = req.Lastname,
                 Email = req.Email,
                 Phone_No = req.Phone_No,
-                Username = req.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(req.Password),
                 Role_Id =  isFirst ? 1: 2,
                 Created_At = DateTime.UtcNow
@@ -65,10 +61,10 @@ namespace Eatspress.Services
         {
             var user = await _db.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Username.ToLower() == req.Username.ToLower());
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == req.Email.ToLower());
             Console.WriteLine(user);
             if (user == null || !BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
-                throw new Exception("Invalid username or password");
+                throw new Exception("Invalid email or password");
 
             var (access, refresh) = _tokens.GenerateTokens(user);
 
@@ -103,7 +99,6 @@ namespace Eatspress.Services
                 Lastname = u.Lastname,
                 Email = u.Email,
                 Phone_No = u.Phone_No,
-                Username = u.Username
             };
         }
     }

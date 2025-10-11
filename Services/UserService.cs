@@ -29,7 +29,6 @@ namespace Eatspress.Services
             if (!string.IsNullOrWhiteSpace(request.Lastname)) user.Lastname = request.Lastname;
             if (!string.IsNullOrWhiteSpace(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrWhiteSpace(request.Phone_No)) user.Phone_No = request.Phone_No;
-            if (!string.IsNullOrWhiteSpace(request.Username)) user.Username = request.Username;
 
             if (request.Address_Id > 0) user.Address_Id = request.Address_Id;
 
@@ -57,7 +56,6 @@ namespace Eatspress.Services
                 Lastname = user.Lastname,
                 Email = user.Email,
                 Phone_No = user.Phone_No,
-                Username = user.Username
             };
         }
 
@@ -71,7 +69,6 @@ namespace Eatspress.Services
                     Lastname = u.Lastname,
                     Email = u.Email,
                     Phone_No = u.Phone_No,
-                    Username = u.Username
                 })
                 .ToListAsync();
         }
@@ -88,7 +85,6 @@ namespace Eatspress.Services
                 Lastname = user.Lastname,
                 Email = user.Email,
                 Phone_No = user.Phone_No,
-                Username = user.Username
             };
         }
 
