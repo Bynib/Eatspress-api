@@ -12,7 +12,6 @@ namespace Eatspress.Models
         public string Email { get; set; }
         public string Phone_No { get; set; }
         public int Address_Id { get; set; }
-        public string Username { get; set; }
         public string Password { get; set; }
         public int Role_Id { get; set; }
         public DateTime Created_At { get; set; }
