@@ -50,7 +50,6 @@ namespace Eatspress.Services
             return new CartResponse
             {
                 Item_Id = cart.Item_Id,
-                Item_Name = item.Name,
                 Quantity = cart.Quantity
             };
         }
@@ -63,7 +62,6 @@ namespace Eatspress.Services
                 .Select(c => new CartResponse
                 {
                     Item_Id = c.Item_Id,
-                    Item_Name = c.FoodItem.Name,
                     Quantity = c.Quantity
                 })
                 .ToListAsync();
@@ -87,7 +85,6 @@ namespace Eatspress.Services
             return new CartResponse
             {
                 Item_Id = cart.Item_Id,
-                Item_Name = item.Name,
                 Quantity = cart.Quantity
             };
         }
