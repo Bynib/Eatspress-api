@@ -121,9 +121,9 @@ namespace Eatspress.Services
                 {
                     Item_Id = d.Item_Id,
                     Quantity = d.Quantity,
-                    Name = d.FoodItem?.Name ?? ""
                 }).ToList()
             };
         }
     }
 }
+    
