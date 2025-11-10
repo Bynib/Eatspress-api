@@ -8,5 +8,6 @@
         public string Barangay { get; set; }
         public string City { get; set; }
         public int Zip_Code { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }
