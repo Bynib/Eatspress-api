@@ -41,7 +41,7 @@ namespace Eatspress.Services
         public async Task<AddressResponse?> GetByIdAsync(int id)
         {
             var addr = await _db.Addresses
-                .FirstOrDefaultAsync(a => a.Address_Id == id && a.Deleted_At == null);
+                .FirstOrDefaultAsync(a => a.Address_Id == id);
 
             return addr == null ? null : MapToResponse(addr);
         }
@@ -49,7 +49,7 @@ namespace Eatspress.Services
         public async Task<IEnumerable<AddressResponse>> GetByUserAsync(int userId)
         {
             var list = await _db.Addresses
-                .Where(a => a.User_Id == userId && a.Deleted_At == null)
+                .Where(a => a.User_Id == userId)
                 .ToListAsync();
 
             return list.Select(MapToResponse);
@@ -92,7 +92,8 @@ namespace Eatspress.Services
                 Street = a.Street,
                 Barangay = a.Barangay,
                 City = a.City,
-                Zip_Code = a.Zip_Code
+                Zip_Code = a.Zip_Code,
+                IsDeleted = a.Deleted_At != null
             };
         }
     }
