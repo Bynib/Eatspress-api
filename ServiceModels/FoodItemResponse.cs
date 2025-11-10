@@ -9,5 +9,6 @@
         public int Category_Id { get; set; }
         public float Price { get; set; }
         public byte[]? Image { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }
