@@ -30,12 +30,13 @@ namespace Eatspress.Services
             if (!string.IsNullOrWhiteSpace(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrWhiteSpace(request.Phone_No)) user.Phone_No = request.Phone_No;
 
-            if (request.Address_Id > 0) user.Address_Id = request.Address_Id;
-
-            if (!string.IsNullOrWhiteSpace(request.OldPassword) &&
-                !string.IsNullOrWhiteSpace(request.NewPassword) &&
+            if (!string.IsNullOrWhiteSpace(request.OldPassword) ||
+                !string.IsNullOrWhiteSpace(request.NewPassword) ||
                 !string.IsNullOrWhiteSpace(request.ConfirmPassword))
             {
+                if (string.IsNullOrWhiteSpace(request.OldPassword)) throw new Exception("Please enter your current Password");
+                if (string.IsNullOrWhiteSpace(request.NewPassword)) throw new Exception("Please enter a new password");
+                if (string.IsNullOrWhiteSpace(request.ConfirmPassword)) throw new Exception("Please enter confirm password");
                 if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.Password))
                     throw new Exception("Old password is incorrect");
 
