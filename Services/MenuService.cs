@@ -58,7 +58,6 @@ namespace Eatspress.Services
         public async Task<IEnumerable<FoodItemResponse>> GetAllAsync()
         {
             var foods = await _db.FoodItems
-                .Where(f => f.Deleted_At == null)
                 .ToListAsync();
 
             var res = new List<FoodItemResponse>();
@@ -71,13 +70,13 @@ namespace Eatspress.Services
         public async Task<FoodItemResponse?> GetByIdAsync(int id)
         {
             var food = await _db.FoodItems
-                .FirstOrDefaultAsync(f => f.Item_Id == id && f.Deleted_At == null);
+                .FirstOrDefaultAsync(f => f.Item_Id == id);
             return food == null ? null : await MapToResponse(food);
         }
 
         public async Task<FoodItemResponse?> UpdateAsync(int id, FoodItemRequest req)
         {
-            var food = await _db.FoodItems.FirstOrDefaultAsync(f => f.Item_Id == id && f.Deleted_At == null);
+            var food = await _db.FoodItems.FirstOrDefaultAsync(f => f.Item_Id == id);
             if (food == null) return null;
             Console.WriteLine(id);
 
@@ -118,7 +117,16 @@ namespace Eatspress.Services
             if (food == null) return false;
 
             food.Deleted_At = DateTime.UtcNow;
+
+            var carts = await _db.Carts
+                .Where(c => c.Item_Id == id)
+                .ToListAsync();
+
+            if (!carts.Any()) return false;
+
+            _db.Carts.RemoveRange(carts);
             await _db.SaveChangesAsync();
+
             return true;
         }
 
@@ -128,7 +136,6 @@ namespace Eatspress.Services
             var filePath = Path.Combine(_imgPath, $"{f.Item_Id}.jpg");
             if (File.Exists(filePath))
                 imgBytes = await File.ReadAllBytesAsync(filePath);
-
             return new FoodItemResponse
             {
                 Item_Id = f.Item_Id,
@@ -137,7 +144,8 @@ namespace Eatspress.Services
                 Prep_Time = f.Prep_Time,
                 Category_Id = f.Category_Id,
                 Price = f.Price,
-                Image = imgBytes
+                Image = imgBytes,
+                IsDeleted = f.Deleted_At != null
             };
         }
     }
