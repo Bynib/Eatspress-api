@@ -25,7 +25,7 @@ namespace Eatspress.Controllers
             try
             {
                 var updatedUser = await _userService.UpdateUserAsync(request);
-                return Ok(updatedUser);
+                return Ok(new {message= "Profile Updated Successfully",user= updatedUser});
             }
             catch (Exception ex)
             {
