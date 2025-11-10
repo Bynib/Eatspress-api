@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-
+using System.Security.Claims;
 namespace Eatspress.Controllers
 {
     [ApiController]
@@ -24,12 +24,16 @@ namespace Eatspress.Controllers
         {
             try
             {
-                var userId = int.Parse(User.FindFirst("sub")!.Value);
+                Console.WriteLine(1);
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                Console.WriteLine(2);
                 var addr = await _svc.CreateAsync(userId, req);
+                Console.WriteLine(3);
                 return Ok(addr);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return BadRequest(new { message = ex.Message });
             }
         }

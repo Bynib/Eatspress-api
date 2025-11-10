@@ -21,9 +21,9 @@ namespace Eatspress.Data
         {
             //address
             modelBuilder.Entity<Address>()
-                .HasOne(u => u.User)
-                .WithMany(a => a.Addresses)
-                .HasForeignKey(u => u.Address_Id);
+                .HasOne(a => a.User)
+                .WithMany(u => u.Addresses)
+                .HasForeignKey(a => a.User_Id);
 
             //cart
             modelBuilder.Entity<Cart>()
