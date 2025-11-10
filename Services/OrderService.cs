@@ -56,6 +56,7 @@ namespace Eatspress.Services
                 .Include(x => x.Address)
                 .Include(x => x.Status)
                 .Include(x => x.OrderDetails).ThenInclude(d => d.FoodItem)
+                .OrderByDescending(x => x.Created_At)
                 .FirstOrDefaultAsync(x => x.Order_Id == id);
 
             return o == null ? null : MapOrder(o);
@@ -67,6 +68,7 @@ namespace Eatspress.Services
                 .Include(x => x.Status)
                 .Include(x => x.OrderDetails).ThenInclude(d => d.FoodItem)
                 .Where(x => x.User_Id == userId)
+                .OrderByDescending(x => x.Created_At)
                 .ToListAsync();
 
             return orders.Select(MapOrder);
@@ -77,6 +79,7 @@ namespace Eatspress.Services
             var orders = await _db.Orders
                 .Include(x => x.Status)
                 .Include(x => x.OrderDetails).ThenInclude(d => d.FoodItem)
+                .OrderByDescending(x => x.Created_At)
                 .ToListAsync();
 
             return orders.Select(MapOrder);
