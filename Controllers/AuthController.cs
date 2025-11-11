@@ -48,6 +48,16 @@ namespace Eatspress.Controllers
             }
         }
 
+        [HttpPost("google")]
+        public async Task<IActionResult> Google([FromBody] LoginRequest request)
+        {
+            try
+            {
+                var res = await _auth.GoogleAsync(request.Email, request.Password, Response);
+                return Ok(new { token = res.token, user = res.user, message = "Logged In Successfully" });
+            }catch(Exception ex) { return Ok(new { message = ex.Message, isNotSignedUp= true }); }
+        }
+
         [HttpPost("refresh")]
         [Authorize]
         public IActionResult Refresh()

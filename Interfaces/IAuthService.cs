@@ -7,6 +7,7 @@ namespace Eatspress.Interfaces
     {
         Task<AuthenticationResponse> RegisterAsync(RegistrationRequest req, HttpResponse res);
         Task<AuthenticationResponse> LoginAsync(LoginRequest req, HttpResponse res);
+        Task<AuthenticationResponse?> GoogleAsync(string email, string password, HttpResponse res);
         string Refresh(string refreshToken);
 
         void Logout(HttpRequest req, HttpResponse res);

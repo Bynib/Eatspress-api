@@ -122,9 +122,7 @@ namespace Eatspress.Services
                 .Where(c => c.Item_Id == id)
                 .ToListAsync();
 
-            if (!carts.Any()) return false;
-
-            _db.Carts.RemoveRange(carts);
+            if (carts.Any()) _db.Carts.RemoveRange(carts);
             await _db.SaveChangesAsync();
 
             return true;

@@ -78,6 +78,26 @@ namespace Eatspress.Services
             };
         }
 
+        public async Task<AuthenticationResponse?> GoogleAsync(string email, string password, HttpResponse res)
+        {
+            var u = await _db.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            if (u == null)
+                throw new Exception("Set your phone number and your password");
+
+            var (access, refresh) = _tokens.GenerateTokens(u);
+
+            // store refresh token in cookie
+            _tokens.Store(res, refresh);
+
+            return new AuthenticationResponse
+            {
+                token = access,
+                user = MapUser(u)
+            };
+        }
+
         public string Refresh(string refreshToken)
         {
             var newAccess = _tokens.Refresh(refreshToken);
