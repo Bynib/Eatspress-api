@@ -16,21 +16,32 @@ namespace Eatspress.Services
     {
         private readonly AppDBContext _db;
         private readonly TokenProvider _tokens;
+        private readonly IValidationService _v;
 
-        public AuthService(AppDBContext db, TokenProvider tokens)
+        public AuthService(AppDBContext db, TokenProvider tokens, IValidationService v)
         {
             _db = db;
             _tokens = tokens;
+            _v = v;
         }
 
         public async Task<AuthenticationResponse> RegisterAsync(RegistrationRequest req, HttpResponse res)
         {
-            if (req.Password != req.ConfirmPassword)
-                throw new Exception("Passwords do not match");
+            
 
             if (await _db.Users.AnyAsync(u => u.Email == req.Email))
                 throw new Exception("Email already exists");
 
+            if (req.Password != req.ConfirmPassword)
+                throw new Exception("Passwords do not match");
+
+            if(!await _v.IsValidEmailAsync(req.Email))
+                    throw new Exception("Invalid email format");
+
+            if(!await _v.IsValidPhoneAsync(req.Phone_No))
+                    throw new Exception("Invalid phone number");
+            if(req.Password.Length < 8)
+                    throw new Exception("Password must be atleast 8 characters long");        
             var isFirst = !await _db.Users.AnyAsync();
             var user = new User
             {
