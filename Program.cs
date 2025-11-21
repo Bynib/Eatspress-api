@@ -63,6 +63,7 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
 
 // Register Authentication helpers
 builder.Services.AddSingleton<TokenConfiguration>(sp =>
