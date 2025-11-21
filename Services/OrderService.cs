@@ -21,6 +21,11 @@ namespace Eatspress.Services
 
         public async Task<int> PlaceOrderAsync(OrderRequest req)
         {
+            foreach (var d in req.Details)
+            {
+                if(d.Quantity > 10) throw new Exception("Each item has a maximum of 10 per order");
+                if(d.Quantity < 1) throw new Exception("Each item has a minimum of 1 per order");
+            }
             var order = new Order
             {
                 User_Id = req.User_Id,
