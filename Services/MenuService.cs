@@ -17,9 +17,11 @@ namespace Eatspress.Services
         private readonly AppDBContext _db;
         private readonly IWebHostEnvironment _env;
         private readonly string _imgPath;
+        private readonly IValidationService _v;
 
-        public MenuService(AppDBContext db, IWebHostEnvironment env)
+        public MenuService(AppDBContext db, IWebHostEnvironment env, IValidationService v)
         {
+            _v = v;
             _db = db;
             _env = env;
             _imgPath = Path.Combine(_env.ContentRootPath, "Resources");
@@ -29,7 +31,13 @@ namespace Eatspress.Services
 
         public async Task<FoodItemResponse> CreateAsync(FoodItemRequest req)
         {
-            Console.WriteLine($"Creating food item: {req.Name}, {req.Description}, {req.Prep_Time}, {req.Category_Id}, {req.Price}");
+            if(!await _v.IsValidImageAsync(req.Image!)) 
+                throw new Exception("Invalid file. Must be an image and a maximum of 2MB");
+            
+            if(req.Price < 1)
+                throw new Exception("Price must be greater than zero");
+            if(req.Prep_Time < 1)
+                throw new Exception("Prep Time must be greater than zero");
             var food = new FoodItem
             {
                 Name = req.Name,
@@ -79,7 +87,10 @@ namespace Eatspress.Services
             var food = await _db.FoodItems.FirstOrDefaultAsync(f => f.Item_Id == id);
             if (food == null) return null;
             Console.WriteLine(id);
-
+            if(req.Price < 1)
+                throw new Exception("Price must be greater than zero");
+            if(req.Prep_Time < 1)
+                throw new Exception("Prep Time must be greater than zero");
             if (!string.IsNullOrWhiteSpace(req.Name))
                 food.Name = req.Name;
 
