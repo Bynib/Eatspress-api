@@ -59,7 +59,6 @@ namespace Eatspress.Controllers
         }
 
         [HttpPost("refresh")]
-        [Authorize]
         public IActionResult Refresh()
         {
             try
