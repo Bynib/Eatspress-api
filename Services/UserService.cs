@@ -14,10 +14,13 @@ namespace Eatspress.Services
     public class UserService : IUserService
     {
         private readonly AppDBContext _context;
+        private readonly IValidationService _v;
+        
 
-        public UserService(AppDBContext context)
+        public UserService(AppDBContext context, IValidationService v)
         {
             _context = context;
+            _v = v;
         }
 
         public async Task<UserResponse> UpdateUserAsync(UpdateUserRequest request)
@@ -27,8 +30,21 @@ namespace Eatspress.Services
 
             if (!string.IsNullOrWhiteSpace(request.Firstname)) user.Firstname = request.Firstname;
             if (!string.IsNullOrWhiteSpace(request.Lastname)) user.Lastname = request.Lastname;
-            if (!string.IsNullOrWhiteSpace(request.Email)) user.Email = request.Email;
-            if (!string.IsNullOrWhiteSpace(request.Phone_No)) user.Phone_No = request.Phone_No;
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                if(!await _v.IsValidEmailAsync(request.Email))
+                    throw new Exception("Invalid email format");
+
+                if (await _context.Users.AnyAsync(u => u.Email == request.Email) && user.Email != request.Email)
+                    throw new Exception("Email already exists");
+                user.Email = request.Email;
+            }
+            if (!string.IsNullOrWhiteSpace(request.Phone_No))
+            {
+                if(!await _v.IsValidPhoneAsync(request.Phone_No))
+                    throw new Exception("Invalid phone number");
+                user.Phone_No = request.Phone_No;
+            }
 
             if (!string.IsNullOrWhiteSpace(request.OldPassword) ||
                 !string.IsNullOrWhiteSpace(request.NewPassword) ||
@@ -43,6 +59,8 @@ namespace Eatspress.Services
                 if (request.NewPassword != request.ConfirmPassword)
                     throw new Exception("New password and confirm password do not match");
 
+                if(request.NewPassword.Length < 8)
+                    throw new Exception("Password must be atleast 8 characters long");
                 user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             }
 
